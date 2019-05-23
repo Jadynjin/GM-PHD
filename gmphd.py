@@ -240,8 +240,10 @@ g.gmm
 			newgmm.append(newcomp)
 
 		# Now ensure the number of components is within the limit, keeping the weightiest
-		newgmm.sort(key=attrgetter('weight'))
-		newgmm.reverse()
+		# NOTE: this sort may change orders of gause components, needed to be fixed.
+		if len(newgmm) > maxcomponents:
+			newgmm.sort(key=attrgetter('weight'))
+			newgmm.reverse()
 		self.gmm = newgmm[:maxcomponents]
 		weightsums.append(simplesum(comp.weight for comp in newgmm))
 		weightsums.append(simplesum(comp.weight for comp in self.gmm))

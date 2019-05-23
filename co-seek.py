@@ -108,7 +108,6 @@ clutter = 1.0/(pi/2+pi/2)/2000*0
 g = Gmphd(birth_gmm,survive_prob, detactive_prob, f, fx, Q, h, hx, R, clutter)
 
 dt = 1
-results = []
 iters = 100
 
 wturn = 2*pi/180
@@ -116,11 +115,13 @@ target1 = Target(np.array([1000+3.8676, -10, 1500-11.7457, -10, wturn/8]))
 target2 = Target(np.array([-250-5.8857, 20, 1000+11.4102, 3, -wturn/3]))
 
 true_items = [[target1.state, target2.state]]
+results = [[target1.state, target2.state]]
 for iter in range(iters):
     # generate true states
     target1.state_update(dt)
     target2.state_update(dt)
-    true_items.append([target1.state, target2.state])
+    true_item = [target1.state, target2.state]
+    true_items.append(true_item)
 
     # generate observations
     obs_set = []
@@ -135,12 +136,38 @@ for iter in range(iters):
     g.update(dt, obs_set)
     g.prune(truncthresh=1e-6, mergethresh=4)
 
+    results.append(g.extractstates())
 
 time = np.arange(iters+1)
-target1_state1 = [record[0][0] for record in true_items] 
-target1_state2 = [record[0][2] for record in true_items] 
-target2_state1 = [record[1][0] for record in true_items] 
-target2_state2 = [record[1][2] for record in true_items] 
+target1_x = [record[0][0] for record in true_items] 
+target1_y = [record[0][2] for record in true_items] 
+target2_x = [record[1][0] for record in true_items] 
+target2_y = [record[1][2] for record in true_items] 
+estimate1_x =[record[0][0] for record in results]  
+estimate2_x =[record[1][0] for record in results]  
+estimate1_y =[record[0][2] for record in results]  
+estimate2_y =[record[1][2] for record in results]  
+n_estimate = [len(record) for record in results]
+
 mlt.figure()
-mlt.plot(target1_state1, target1_state2, target2_state1, target2_state2)
+mlt.plot(target1_x, target1_y, target2_x, target2_y)
+
+mlt.figure()
+mlt.plot(time, target1_x, label='target1 x true')
+mlt.plot(time, target2_x, label='target2 x true')
+mlt.plot(time, estimate1_x, label='estimate1 x')
+mlt.plot(time, estimate2_x, label='estimate2 x')
+mlt.legend()
+
+mlt.figure()
+mlt.plot(time, target1_y, label='target1 y true')
+mlt.plot(time, target2_y, label='target2 y true')
+mlt.plot(time, estimate1_y, label='estimate1 y')
+mlt.plot(time, estimate2_y, label='estimate2 y')
+mlt.legend()
+
+mlt.figure()
+mlt.plot(time, n_estimate, label='n estimate')
+mlt.legend()
+
 mlt.show()
