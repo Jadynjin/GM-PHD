@@ -188,8 +188,9 @@ g.gmm
 			anobs = array(anobs)
 			newgmmpartial = []
 			for j, comp in enumerate(predicted):
+				# NOTE: reshape issue. MUST fixed.
 				newgmmpartial.append(GmphdComponent(self.detection * comp.weight * dmvnorm(eta[j], s[j], anobs), 
-																						reshape(comp.loc, (5,)) + dot(k[j], anobs - eta[j]),   
+																						reshape(comp.loc, (4,)) + dot(k[j], anobs - eta[j]),   
 																						pkk[j]))
 	
 			# The Kappa thing (clutter and reweight)
