@@ -40,17 +40,18 @@ est.filter= filter;
 
 %initial prior
 w_update(1)= eps;
-m_update(:,1)= [ 200e3; 365e3; 0e3; 3e3; 360; 0; 0; 0; 0 ];%.*randn(9,1);
+% m_update(:,1) = [200e3; 365e3; 0; 3e3; 360; 0; 0; 0; 0]; %.*randn(9,1);
+m_update(:,1)= [ 200e3; 365e3; 10; 100];%.*randn(9,1);
 % m_update(:,1)= randn(9,1);
-P_update(:,:,1)= 1e0*diag([ 500e1; 500e1; 500e1; 50; 50; 50; 5; 5; 5 ]).^2;
+% P_update(:,:,1) = diag([500; 500; 500; 50; 50; 50; 5; 5; 5]).^2;
+P_update(:,:,1)= 1e0*diag([ 100e0; 100e0; 10; 10]).^2;
 L_update = 1;
 
 %recursive filtering
 for k=1:meas.K
-    %---prediction 
+    %---prediction
     [m_predict,P_predict] = ekf_predict_multiple(model,m_update,P_update);                          %surviving components
     w_predict= model.P_S*w_update;                                                                  %surviving weights
-
     m_predict= cat(2,model.m_birth,m_predict); P_predict=cat(3,model.P_birth,P_predict);            %append birth components
     w_predict= cat(1,model.w_birth,w_predict);                                                      %append birth weights
                                                  
@@ -74,11 +75,11 @@ for k=1:meas.K
     
     if m~=0
         %m detection terms 
-        [qz_temp,m_temp,P_temp] = ekf_update_multiple(meas.Z{k,i},model,m_predict,P_predict,k,i);
+        [qz_temp,m_temp,P_temp] = ekf_update_multiple(meas.Z{k},model,m_predict,P_predict,k,i);
         for ell=1:m
-            w_temp = model.P_D*w_predict(:).*qz_temp(:,ell); 
+            w_temp = model.P_D*w_predict(:).*qz_temp(:,ell);
 %             if sum(w_temp) > 0 
-                w_temp = w_temp./(model.lambda_c*model.pdf_c + sum(w_temp)); 
+                w_temp = w_temp./(model.lambda_c*model.pdf_c + sum(w_temp));
 %             else
 %                 w_temp = 1/numel(w_temp)*ones(size(w_temp));
 %             end

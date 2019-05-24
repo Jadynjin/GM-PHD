@@ -22,11 +22,14 @@ else %modify below here for user specified measurement model
     dP = dP0(:,:,i);
 %     Z(1,:)= atan2(dP1(2,:),norm(dP1([1 3],:)));   
 %     Z(2,:)= atan2(-dP1(3,:),dP1(1,:));
+%     Z(1,:)= atan2(dP(2,:),norm(dP([1 3],:)));   
+%     Z(2,:)= atan2(-dP(3,:),dP(1,:));
 %     Z(3,:)= atan2(dP2(2,:),norm(dP2([1 3],:)));
 %     Z(4,:)= atan2(-dP2(3,:),dP2(1,:));
    
-    Z(1,:)= atan2(dP(2,:),norm(dP([1 3],:)));   
-    Z(2,:)= atan2(-dP(3,:),dP(1,:));
+    % ASSUMES the relative position of two observers is always [0; 500]
+    Z(1,:)= atan2(X(2,:), X(1,:));   
+    Z(2,:)= atan2(X(2,:)-500, X(1,:));
 %     Z(3,:)= atan2(dP2(2,:),norm(dP2([1 3],:)));
 %     Z(4,:)= atan2(-dP2(3,:),dP2(1,:));
     Z= Z+ W;
