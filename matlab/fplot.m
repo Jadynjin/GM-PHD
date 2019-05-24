@@ -6,17 +6,17 @@ load truth
 load est
 
 N = truth.K;
-X1 = zeros(N,4);
-X2 = zeros(N,4);
-X1_est = zeros(N,4);
-X2_est = zeros(N,4);
+X1 = zeros(N,6);
+X2 = zeros(N,6);
+X1_est = zeros(N,6);
+X2_est = zeros(N,6);
 for i = 1:N
     X1(i,:) = truth.X{i}(:,1)';
     X2(i,:) = truth.X{i}(:,2)';
     if size(est.X{i},2) < 2
         if i == 1
-            X1_est(i,:) = zeros(1,4);
-            X2_est(i,:) = zeros(1,4);   
+            X1_est(i,:) = zeros(1,6);
+            X2_est(i,:) = zeros(1,6);   
         else
             X1_est(i,:) = X1_est(i-1,:);
             X2_est(i,:) = X2_est(i-1,:);

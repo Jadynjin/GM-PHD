@@ -34,8 +34,8 @@ A33 = [exp(-ldx*dt)           0                       0
 % Ak  = [eye(3)  dt*eye(3) A13
 %        zeros(3) eye(3)    A23
 %        zeros(3) zeros(3)  A33];
-Ak  = [eye(2)   dt*eye(2)
-       zeros(2) eye(2)];
+Ak  = [eye(3)   dt*eye(3)
+       zeros(3) eye(3)];
    
 X = Ak*Xd;
     %-- add scaled noise 

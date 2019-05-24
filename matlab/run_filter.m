@@ -41,10 +41,10 @@ est.filter= filter;
 %initial prior
 w_update(1)= eps;
 % m_update(:,1) = [200e3; 365e3; 0; 3e3; 360; 0; 0; 0; 0]; %.*randn(9,1);
-m_update(:,1)= [ 200e3; 365e3; 10; 100];%.*randn(9,1);
+m_update(:,1)= [ 200e3; 365e3; 0; 10; 100; 0];%.*randn(9,1);
 % m_update(:,1)= randn(9,1);
 % P_update(:,:,1) = diag([500; 500; 500; 50; 50; 50; 5; 5; 5]).^2;
-P_update(:,:,1)= 1e0*diag([ 100e0; 100e0; 10; 10]).^2;
+P_update(:,:,1)= 1e0*diag([ 100e0; 100e0; 10; 10; 10; 10]).^2;
 L_update = 1;
 
 %recursive filtering
