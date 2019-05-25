@@ -38,9 +38,8 @@ class GmphdComponent:
 	Note that we don't require a GM to sum to 1, since not always about proby densities."""
 	def __init__(self, weight, loc, cov):
 		self.weight = myfloat(weight)
-		self.loc    = array(loc, dtype=myfloat, ndmin=2)
+		self.loc    = array(loc, dtype=myfloat)
 		self.cov    = array(cov, dtype=myfloat, ndmin=2)
-		self.loc    = reshape(self.loc, (size(self.loc), 1)) # enforce column vec
 		self.cov    = reshape(self.cov, (size(self.loc), size(self.loc))) # ensure shape matches loc shape
 		# precalculated values for evaluating gaussian:
 		k = len(self.loc)
@@ -190,7 +189,7 @@ g.gmm
 			for j, comp in enumerate(predicted):
 				# NOTE: reshape issue. MUST fixed.
 				newgmmpartial.append(GmphdComponent(self.detection * comp.weight * dmvnorm(eta[j], s[j], anobs), 
-																						reshape(comp.loc, (4,)) + dot(k[j], anobs - eta[j]),   
+																						comp.loc + dot(k[j], anobs - eta[j]),   
 																						pkk[j]))
 	
 			# The Kappa thing (clutter and reweight)
@@ -235,8 +234,7 @@ g.gmm
 			newcomp = GmphdComponent( \
 				aggweight,
 				sum(array([comp.weight * comp.loc for comp in subsumed]), 0) / aggweight,
-				sum(array([comp.weight * (comp.cov + (weightiest.loc - comp.loc) \
-				                                   * (weightiest.loc - comp.loc).T) for comp in subsumed]), 0) / aggweight
+				sum(array([comp.weight * (comp.cov + outer(weightiest.loc - comp.loc, weightiest.loc - comp.loc)) for comp in subsumed]), 0) / aggweight
 					)
 			newgmm.append(newcomp)
 

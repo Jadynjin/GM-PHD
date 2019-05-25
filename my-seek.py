@@ -84,10 +84,10 @@ for iter in range(iters):
 
     results.append(g.extractstates())
     
-estimate1_x =[record[0][0][0] for record in results]  
-estimate2_x =[record[1][0][0] for record in results]  
-estimate1_y =[record[0][1][0] for record in results]  
-estimate2_y =[record[1][1][0] for record in results]  
+estimate1_x =[record[0][0] for record in results]  
+estimate2_x =[record[1][0] for record in results]  
+estimate1_y =[record[0][1] for record in results]  
+estimate2_y =[record[1][1] for record in results]  
 n_estimate = [len(record) for record in results]
 
 time = np.arange(len(BM1_pos_x))
