@@ -1,0 +1,28 @@
+\documentclass[UTF8]{ctexart} % for Chinese input
+\usepackage{amsmath}
+\begin{document}
+\section{}
+传统做法：把bias加入原状态变量，形成增广状态矩阵，叫做Augmented state Kalman filter (ASKF)。计算困难：矩阵维数增长导致的计算复杂度和截断误差。
+
+\cite{friedlandTreatmentBiasRecursive1969}最早提出把ASKF解耦，即把偏差和状态隔离开的思想，即Two stage Kalman filter(TSKF)，也叫bias separate Kalman filter.考虑模型
+
+\[\begin{array}{l}
+{{\bf{x}}_{k + 1}} = F{{\bf{x}}_k} + B{{\bf{b}}_k} + {v_x}\\
+{b_{k + 1}} = {b_k}\\
+{z_k} = H{x_k} + D{b_k} + w
+\end{array}\]	  	
+
+该方法的本质思想就是把ASKF解耦成两个滤波器，分别称为bias-free filter和bias filter。
+
+如果考虑bias的噪声，ASKF的解耦遇到了困难。原来的方法不是最优的，即和原来的ASKF不等价。在解耦的过程中做了一些近似，称为VDB和KVDB技术。 %要验证
+
+在多目标多传感器跟踪的背景下，\cite{xiangdonglinExactMultisensorDynamic004}利用多传感器的测量得到精确的bias filter，并利用多目标的测量来提高bias的估计精度，称为EX(exact)方法。\cite{taghaviMultisensorMultitargetBearing2016}针对被动测量的情况进行了讨论。坐标转换技巧在被动测量下意义不大，转换后依然是非线性的。这种方法，主动测量至少需要两个传感器，被动测量至少需要3个传感器。在目标个数较少的时候，效果会降低。
+
+% TODO: use this method
+\cite{chien-shuhsiehOptimalSolutionTwostage1999}修改了bias free filter，增加了bias的补偿，实现了最优。在此基础上，\cite{chenNovelTwostageExtended2016}针对非线性系统，提出了EKF版本。\cite{wufanJiYuATSUKFSuanFaDeWeiXingZiKongXiTongGuZhangGuJi2018}提出了UKF版本。
+
+% TODO: use this method
+后来那本书提出了Gaussian mean shift registration方法来估计bias。
+
+\equiv
+\end{document}
