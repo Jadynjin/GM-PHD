@@ -7,6 +7,7 @@ from helper import CV_model_2d_func, CV_model_2d_jacobian, Target, Bearing_only_
 from KalmanFilter import KalmanFilter
 from filterpy.kalman import ExtendedKalmanFilter
 
+np.random.seed(0)
 # Simulation setting
 dt = 0.01
 total_time = 20

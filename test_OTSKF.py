@@ -6,6 +6,7 @@ from math import atan2
 from helper import CV_model_2d_func, CV_model_2d_jacobian, Target, Bearing_only_sensor
 from TwoStageKalmanFilter import OptimalTwoStageKalmanFilter
 
+np.random.seed(0)
 # Simulation setting
 dt = 0.01
 total_time = 20
@@ -24,19 +25,19 @@ sensor1 = Bearing_only_sensor(
         bias=sensor1_bias,
         random=1e-5)
 
-sensor2_pos = [50000., 0.]
+sensor2_pos = [500., 0.]
 sensor2 = Bearing_only_sensor(
         pos = sensor2_pos,
-        bias=-10/60/57.3,
+        bias=-15/60/57.3,
         random=1e-5)
 
 
 # Define filter
-x = [0., 0., 199000., -7000.]
-Px = np.diag([10, 10, 1e3, 200])**2
+x = [0., 0., 199000., -6000.]
+Px = [10, 10, 1e3, 1200]
 
 b = [0., 0.]
-Pb = np.diag([1e-2, 1e-2])**2
+Pb = [1e-2, 1e-2]
 
 fx = CV_model_2d_func
 f = CV_model_2d_jacobian
@@ -50,17 +51,17 @@ Qb = np.diag([1e-6, 1e-6])**2
 
 def hx(x, dt):
     return np.array([atan2(x[0], x[2]),
-                     atan2(x[0] - 50000, x[2])])
+                     atan2(x[0] - 500, x[2])])
 
 def h(x, dt):
     mag = x[2]**2 + x[0]**2
-    mag2 = x[2]**2 + (x[0] - 50000)**2
-    H = np.array([[-x[0]/mag, x[2]/mag, 0, 0],
-                  [-(x[0] - 50000)/mag2, x[2]/mag2, 0, 0]])
+    mag2 = x[2]**2 + (x[0] - 500)**2
+    H = np.array([[x[2]/mag, 0, -x[0]/mag, 0],
+                  [x[2]/mag2, 0, -(x[0]-500)/mag2, 0]])
     U = np.eye(2)
     return H
 
-R = np.diag([1e-5, 1e-5])**2
+R = [1e-5, 1e-5]
 
 otskf = OptimalTwoStageKalmanFilter(x, Px, b, Pb, Qx, Qb, R, F=f, H=h, Hx=hx) 
 filter_result = [otskf.b]

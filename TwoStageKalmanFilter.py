@@ -44,13 +44,16 @@ class OptimalTwoStageKalmanFilter:
     points:
     """
     def __init__(self, x1, P1, b, P2, Q_x, Q_b, R, F=None, Fx=None, H=None, Hx=None, B=None, C=None, D=None, points=None):
+        """
+        :param x1: list
+        """
         dim_x = len(x1)
         dim_z = len(b)
 
         self.x1 = np.array(x1)
-        self.P1 = np.diag(P1)
+        self.P1 = np.diag(P1)**2
         self.b = np.array(b)
-        self.P2 = np.diag(P2)
+        self.P2 = np.diag(P2)**2
         # Assumes at initial time, state and bias are independent
         self.V = np.zeros((dim_x, dim_z))
         self.x = deepcopy(self.x1)
@@ -69,7 +72,7 @@ class OptimalTwoStageKalmanFilter:
             self.Hx = lambda x, dt: H(x, dt) @ x
         else:
             self.Hx = Hx
-        self.R = np.diag(R)
+        self.R = np.diag(R)**2
 
         if B == None:
             self.B = np.zeros((dim_x, dim_z))
@@ -108,12 +111,12 @@ class OptimalTwoStageKalmanFilter:
         b_prior = C @ b
         P2_prior = C @ P2 @ C.T + Qb
         # coupling
-        # x?
         Ubar = (F(x, dt) @ V + B) @ np.linalg.inv(C)
         U = Ubar @ (np.eye(self.dim_z) - Qb @ np.linalg.inv(P2_prior))
         # bias-free filter
         x1_prior = Fx(x, dt) + B @ b - U @ b_prior
-        P1_prior = F(x, dt) @ P1 @ F(x, dt).T + Qx + U @ Qb @ Ubar.T
+        # P1_prior = F(x, dt) @ P1 @ F(x, dt).T + Qx + U @ Qb @ Ubar.T
+        P1_prior = F(x, dt) @ P1 @ F(x, dt).T + Qx + Ubar @ P2 @ Ubar.T - U @ P2_prior @ U.T
         ### ---------------- UPDATE -----------------
         x_prior = x1_prior + U @ b_prior
         # bias filter
@@ -125,7 +128,8 @@ class OptimalTwoStageKalmanFilter:
         P2 = (P2 + P2.T)/2
         # bias-free filter
         K1 = P1_prior @ H(x_prior, dt).T @ np.linalg.inv(H(x_prior, dt) @ P1_prior @ H(x_prior, dt).T + R)
-        x1 = x1_prior + K1 @ (y - H(x_prior, dt) @ x1_prior)
+        # resi1 = y - Hx(x_prior, dt)
+        x1 = x1_prior + K1 @ (resi2 + S @ b_prior)
         P1 = (np.eye(self.dim_x) - K1 @ H(x_prior, dt)) @ P1_prior
         P1 = (P1 + P1.T)/2
         # coupling
