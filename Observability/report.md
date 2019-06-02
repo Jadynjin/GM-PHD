@@ -1,0 +1,5 @@
+# Observability of bearing-only tracking via multiple sensors with bias
+
+`Bearings-only tracking analysis via information geometry` discussed about the optimal movement of a sensor to get the most information. In the paper, the target is assumed to be static, which makes the problem easier. The main method is to find the maximum of the determinent of Fisher information matrix(FIM). The method can be refered. In my problem, a static target and four sensors are included. I have four measurements for four states(`[x, y, b1, b2]`), making the states observable. Then I calculate the FIM, then the determinent of it. To get the maximum, I need calculate the partial difference subject to headings. I think I will get two conditionals for two sensors' headings subject to each sensor's LOS, velocity and relative position. From the two I can get the headings.
+
+But in this scenario, the FIM will become 4-order, making the calculation difficult. I may try `Sympy` to help me. Besides, other ways may be better.
