@@ -83,7 +83,7 @@ class OptimalTwoStageKalmanFilter:
 
         self.dim_x = dim_x
         self.dim_z = dim_z
-    def predict_and_update(self, dt, y):
+    def predict_and_update(self, dt, y, **args):
         """
         dt: float, step time
         y: m vector, measurement
@@ -111,26 +111,24 @@ class OptimalTwoStageKalmanFilter:
         b_prior = C @ b
         P2_prior = C @ P2 @ C.T + Qb
         # coupling
-        Ubar = (F(x, dt) @ V + B) @ np.linalg.inv(C)
-        U = Ubar @ (np.eye(self.dim_z) - Qb @ np.linalg.inv(P2_prior))
+        Ubar = F(x, dt) @ V + B 
+        U = Ubar @ P2 @ C.T @ np.linalg.inv(P2_prior)
         # bias-free filter
         x1_prior = Fx(x, dt) + B @ b - U @ b_prior
-        # P1_prior = F(x, dt) @ P1 @ F(x, dt).T + Qx + U @ Qb @ Ubar.T
         P1_prior = F(x, dt) @ P1 @ F(x, dt).T + Qx + Ubar @ P2 @ Ubar.T - U @ P2_prior @ U.T
         ### ---------------- UPDATE -----------------
         x_prior = x1_prior + U @ b_prior
         # bias filter
-        S = H(x_prior, dt) @ U + D
-        K2 = P2_prior @ S.T @ np.linalg.inv(S @ P2_prior @ S.T + R + H(x_prior, dt) @ P1_prior @ H(x_prior, dt).T) 
-        resi2 = (y - Hx(x_prior, dt) - D @ b_prior)
+        S = H(x_prior, dt, **args) @ U + D
+        K2 = P2_prior @ S.T @ np.linalg.inv(S @ P2_prior @ S.T + R + H(x_prior, dt, **args) @ P1_prior @ H(x_prior, dt, **args).T) 
+        resi2 = (y - Hx(x_prior, dt, **args) - D @ b_prior)
         b = b_prior + K2 @ resi2
         P2 = (np.eye(self.dim_z) - K2 @ S) @ P2_prior
         P2 = (P2 + P2.T)/2
         # bias-free filter
-        K1 = P1_prior @ H(x_prior, dt).T @ np.linalg.inv(H(x_prior, dt) @ P1_prior @ H(x_prior, dt).T + R)
-        # resi1 = y - Hx(x_prior, dt)
+        K1 = P1_prior @ H(x_prior, dt, **args).T @ np.linalg.inv(H(x_prior, dt, **args) @ P1_prior @ H(x_prior, dt, **args).T + R)
         x1 = x1_prior + K1 @ (resi2 + S @ b_prior)
-        P1 = (np.eye(self.dim_x) - K1 @ H(x_prior, dt)) @ P1_prior
+        P1 = (np.eye(self.dim_x) - K1 @ H(x_prior, dt, **args)) @ P1_prior
         P1 = (P1 + P1.T)/2
         # coupling
         V = U - K1 @ S

@@ -25,7 +25,10 @@ sensor1 = Bearing_only_sensor(
         bias=sensor1_bias,
         random=1e-5)
 
-sensor2_pos = [500., 0.]
+# This relative position can give a better result.
+# sensor2_pos = [500., 0.]
+# While this cannot.
+sensor2_pos = [5000., 0.]
 sensor2 = Bearing_only_sensor(
         pos = sensor2_pos,
         bias=-15/60/57.3,
@@ -49,15 +52,15 @@ Qx = np.array(
          [0, 0, dt**2/2, dt]])*q
 Qb = np.diag([1e-6, 1e-6])**2
 
-def hx(x, dt):
+def hx(x, dt, sensor2_pos):
     return np.array([atan2(x[0], x[2]),
-                     atan2(x[0] - 500, x[2])])
+                     atan2(x[0] - sensor2_pos[0], x[2] - sensor2_pos[1])])
 
-def h(x, dt):
+def h(x, dt, sensor2_pos):
     mag = x[2]**2 + x[0]**2
-    mag2 = x[2]**2 + (x[0] - 500)**2
+    mag2 = (x[2] - sensor2_pos[1])**2 + (x[0] - sensor2_pos[0])**2
     H = np.array([[x[2]/mag, 0, -x[0]/mag, 0],
-                  [x[2]/mag2, 0, -(x[0]-500)/mag2, 0]])
+                  [(x[2] - sensor2_pos[1])/mag2, 0, -(x[0] - sensor2_pos[0])/mag2, 0]])
     U = np.eye(2)
     return H
 
@@ -80,7 +83,7 @@ for iter in range(iters):
     
     # Filter
     obs_set = np.array(obs_set)
-    otskf.predict_and_update(dt, obs_set)
+    otskf.predict_and_update(dt, obs_set, sensor2_pos=sensor2.pos)
     filter_result.append(otskf.b)
     
 # Generate data
