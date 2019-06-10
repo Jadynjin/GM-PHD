@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.random import randn
-from math import atan2
+from math import atan2, sqrt
 
 def CV_model_2d_func(x, dt):
     return np.array([x[0] + x[1]*dt,
@@ -47,9 +47,10 @@ class Target:
     def __init__(self, pos, vel):
         self.pos = np.array(pos)
         self.vel = np.array(vel)
-        self.pos_history = [self.pos]
+        self.pos_history = [self.pos.copy()]
     def update(self, dt):
         self.pos += dt * self.vel
+        self.pos_history.append(self.pos.copy())
 
 class Bearing_only_sensor:
     """
@@ -70,3 +71,26 @@ class Bearing_only_sensor:
         """
         x = target.pos - self.pos
         return atan2(x[0], x[1]) + self.bias + self.random * randn()
+
+class Radar:
+    """
+    Defines a radar.
+
+    :param pos: list, position
+    :param bias: list, bias for range and azimuth, defaults to [0, 0]
+    :param random: list, random error, defaults to [0 m, 0 rad]
+    """
+    def __init__(self, pos, bias=[0., 0.], random=[0., 0.]):
+        self.pos = pos
+        self.bias = np.array(bias)
+        self.random = np.array(random)
+    def measure(self, target):
+        """
+        :param target: Target, the target being measured
+        :returns: float, bearing with bias and random error
+        """
+        x = target.pos - self.pos
+        return np.array([
+            sqrt(x[0]**2 + x[1]**2),
+            atan2(x[0], x[1])]) + \
+            self.bias + self.random * randn(2)

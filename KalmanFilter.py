@@ -9,6 +9,15 @@ class KalmanFilter:
     When points is presented, performs UKF. F and H will be ignored.
     """
     def __init__(self, x, P, Q, R, F=None, fx=None, H=None, hx=None):
+        """
+        :param x: list
+        :param P: list, sqrt of diagnose of P, std of each variable
+        :param Q: 2d ndarray
+        :param R: list, sqrt of diagnose of R, std of each measurement
+        :param F: (x, dt) => 2d ndarray
+        :param H: (x) => 2d ndarray
+        :param hx: (x, args) => 1d ndarray
+        """
         self.dim_x = len(x)
         self.dim_z = len(R)
 
@@ -28,7 +37,7 @@ class KalmanFilter:
         else:
             self.hx = hx
         self.R = np.diag(R)**2
-    def predict_update(self, dt, z):
+    def predict_update(self, dt, z, **args):
         x = self.x
         P = self.P
 
@@ -40,7 +49,7 @@ class KalmanFilter:
 
         S = H(x_prior) @ P_prior @ H(x_prior).T + self.R
         K = P_prior @ H(x_prior).T @ np.linalg.inv(S)
-        resident = z - self.hx(x_prior)
+        resident = z - self.hx(x_prior, **args)
         self.x = x_prior + K @ resident
         self.P = (np.eye(self.dim_x) - K @ H(x_prior)) @ P_prior
 
