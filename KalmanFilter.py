@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.linalg.inv
 
 class KalmanFilter:
     """
@@ -37,20 +38,34 @@ class KalmanFilter:
         else:
             self.hx = hx
         self.R = np.diag(R)**2
-    def predict_update(self, dt, z, **args):
+
+        self.x_prior = np.zeros((self.dim_x,))
+        self.P_prior = np.zeros((self.dim_x, self.dim_x))
+
+    def predict_update(self, dt, z, h_args=(), hx_args=()):
+        self.predict(dt)
+        self.update(z, h_args, hx_args)
+
+    def predict(self, dt):
         x = self.x
         P = self.P
 
         F = self.F
+
+        self.x_prior = self.fx(x, dt)
+        self.P_prior = F(x, dt) @ P @ F(x, dt).T + self.Q
+
+    def update(self, z, h_args, hx_args):
+        x_prior = self.x_prior
+        P_prior = self.P_prior
+
         H = self.H
 
-        x_prior = self.fx(x, dt)
-        P_prior = F(x, dt) @ P @ F(x, dt).T + self.Q
-
         S = H(x_prior) @ P_prior @ H(x_prior).T + self.R
-        K = P_prior @ H(x_prior).T @ np.linalg.inv(S)
-        resident = z - self.hx(x_prior, **args)
-        self.x = x_prior + K @ resident
-        self.P = (np.eye(self.dim_x) - K @ H(x_prior)) @ P_prior
+        K = P_prior @ H(x_prior).T @ inv(S)
+        residual = z - self.hx(x_prior, *hx_args)
+        self.x = x_prior + K @ residual
+        I_KH = np.eye(self.dim_x) - K @ H
+        self.P = I_KH @ P_prior @ I_KH.T + K @ self.R @ K.T
 
         
